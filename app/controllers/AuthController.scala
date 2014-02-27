@@ -76,7 +76,7 @@ object Secure extends Enumeration {
 
 trait Secured {
   
-  private def username(request: RequestHeader) = request.session.get(Security.username)
+  def username(request: RequestHeader) = request.session.get(Security.username)
   
   def currentUser(implicit request: RequestHeader, session: Session) =
     username(request).map(username => Users.findByUsername(username)).flatten

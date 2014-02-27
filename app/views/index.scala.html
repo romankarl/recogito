@@ -1,4 +1,4 @@
-@(user: models.User)(implicit s: play.api.db.slick.Config.driver.simple.Session)
+@(documents: Seq[(GeoDocument, Int, Int)], user: models.User)
 
 @import tags.lang
 
@@ -49,41 +49,40 @@
     <div id="container">    
       <table>   
         <tbody>
-          @for(doc <- models.GeoDocuments.listAll().sortBy(d => (d.date, d.author, d.title))) {
-          	@defining(user.canEdit(doc.id.get)) { canEdit =>
+          @for(doc <- documents) {
+          	@defining(user.canEdit(doc._1.id.get)) { canEdit =>
           	  @if(canEdit) { <tr> } else { <tr class="locked-document"> }
           	    <td> <!-- document title -->
           	      @if(!canEdit) {
           	        <span class="icon locked-document">&#xf023;</span>
           	      }
-          	      @doc.author.map(_ + ": ").getOrElse("") @doc.title
-          	      @doc.dateComment.map("(" + _ + ")").getOrElse("") 
+          	      @doc._1.author.map(_ + ": ").getOrElse("") @doc._1.title
+          	      @doc._1.dateComment.map("(" + _ + ")").getOrElse("") 
           	    </td>
           	    
-          	    <td>@lang(doc.language)</td>
+          	    <td>@lang(doc._1.language)</td>
           	  
-          	    @defining(models.GeoDocumentParts.countForGeoDocument(doc.id.get)) { parts =>
+          	    @* defining(models.GeoDocumentParts.countForGeoDocument(doc.id.get)) { parts =>
           	  	  <!-- number of parts -->
                   @if(parts == 0) { 
           	        <td colspan="2" class="center">-</td>
           	      } else {
           	        <td class="right">@parts</td><td><a class="icon toggle toggle-@doc.id.get" href="#" onclick="toggleDetails(@doc.id.get); return false;"></a></td>
           	      }         	      
-          	    }
+          	    } *@
           	  
           	    <!-- number of toponyms -->
-          	    <td class="center">
-          	      @doc.totalToponymCount
-          	    </td>
+          	    <td class="center">@doc._2</td>
           	  
-          	    <td class="stats"> <!-- completion ratio -->
-          	      @defining(doc.completionRatio * 100) { completionRatio =>
-          	        <div class="meter" title="@{ "%.2f" format (completionRatio) } %">
-	                  <span style="width: @completionRatio%"></span>
+                <td class="stats">
+                  @defining(((doc._2 - doc._3).toDouble / doc._2) * 100) { completionRatio =>
+                    <div class="meter" title="@{ "%.2f" format (completionRatio) } %">
+                      <span style="width: @completionRatio%"></span>
                     </div>
                   }
-          	    </td>
-          	    <td class="more-stats"><a href="@routes.ApplicationController.showDocumentStats(doc.id.get)" class="icon" title="Detailed Stats">&#xf080;</a></td>
+                </td>
+              
+          	    <td class="more-stats"><a href="@routes.ApplicationController.showDocumentStats(doc._1.id.get)" class="icon" title="Detailed Stats">&#xf080;</a></td>
           	  
           	    <td class="icons"> <!-- icons: map, public map, text -->
           	      @defining(GeoDocumentTexts.getTextForGeoDocument(doc.id.get)) { text =>
@@ -159,18 +158,5 @@
         </tbody> 
       </table>
     </div>
-    
-    <!-- div id="footer">
-      <615 Annotations  
-      <span class="icon">&#xf14a;</span> 577  
-      <span class="icon">&#xf024;</span> 21   
-      <span class="icon">&#xf057;</span> 0  
-      <span class="icon">&#xf05e;</span> 0
-      -   97.1% Complete>
-      
-      <div id="user">
-        You are logged in as <span id="username">@user.username</span> <a href="@routes.AuthController.logout" class="icon">&#xf011;</a>
-      </div>
-    </div -->
   </body>
 </html>

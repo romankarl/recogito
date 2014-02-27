@@ -4,6 +4,7 @@ import models._
 import play.api.db.slick._
 import play.api.Play.current
 import play.api.libs.json.Json
+import play.api.libs.concurrent.Execution.Implicits.defaultContext   
 import play.api.mvc.{ Action, Controller }
 import play.api.Logger
 
@@ -15,13 +16,48 @@ object ApplicationController extends Controller with Secured {
   
   private val UTF8 = "UTF-8"
     
+
   /** Returns the index page for logged-in users **/
-  def index = DBAction { implicit rs => 
-    if (isAuthorized)
-      Ok(views.html.index(currentUser.get))
-    else
-      Ok(views.html.index_public())
+  def index = Action.async { implicit request =>
+    val u = username(request) 
+    val future = scala.concurrent.Future {
+      DB.withSession { implicit s:Session =>
+        val docs = GeoDocuments.listAll
+          .sortBy(d => (d.date, d.author, d.title))
+          .map(doc => (doc, doc.totalToponymCount, doc.unverifiedToponymCount))
+          
+        val user = u.map(u => Users.findByUsername(u)).flatten        
+        (docs, user)
+      }
+    }
+    
+    if (isAuthorized) {
+      future.map(result => Ok(views.html.index(result._1, result._2.get)))
+    } else {
+      future.map(result => Ok(views.html.index_public(result._1)))
+    }
   }
+  
+  /*
+  def index = DBAction { implicit rs => Async { 
+    if (isAuthorized) {
+      val future = scala.concurrent.Future { }
+      future.map(_ => NotFound) // Ok(views.html.index(currentUser.get))
+    } else {
+      
+      val future = scala.concurrent.Future {
+        GeoDocuments.listAll
+          .sortBy(d => (d.date, d.author, d.title))
+          .map(doc => (doc, doc.totalToponymCount, doc.unverifiedToponymCount))
+      }
+      
+      future.map(result => Ok(views.html.index_public(result)))
+      
+
+      // Ok(views.html.index_public(documents))
+    }
+  } }
+   */
    
   /** Shows the 'public map' for the specified document.
     *  
