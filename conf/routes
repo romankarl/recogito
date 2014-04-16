@@ -31,6 +31,14 @@ GET     /recogito/api/annotations                  controllers.AnnotationControl
 POST    /recogito/api/annotations                  controllers.AnnotationController.create
 PUT     /recogito/api/annotations                  controllers.AnnotationController.updateBatch
 
+# ImageAnnotations
+GET     /recogito/img-annotation                   controllers.ImageAnnotationController.index
+GET     /recogito/api/img-annotations/:id          controllers.ImageAnnotationController.get(id: Int)
+PUT     /recogito/api/img-annotations/:id          controllers.ImageAnnotationController.update(id: Int)
+DELETE  /recogito/api/img-annotations/:id          controllers.ImageAnnotationController.delete(id: Int)
+GET     /recogito/api/img-annotations              controllers.ImageAnnotationController.forSiteUrl(contextURL: String)
+POST    /recogito/api/img-annotations              controllers.ImageAnnotationController.create
+
 # Search
 GET     /recogito/api/search/place                 controllers.SearchController.placeSearch(query: String)
 

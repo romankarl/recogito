@@ -1,0 +1,29 @@
+@()
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>RECOGITO Text Annotation</title>
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/annotation/main.css")">
+    <link rel="stylesheet" href="http://annotorious.github.io/latest/themes/dark/annotorious-dark.css">
+    <script type="text/javascript" src="http://annotorious.github.io/latest/annotorious.min.js"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/anno-vanilla-rest-plugin.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery/jquery-2.0.0.min.js")"></script>
+    <script>
+      anno.addPlugin('VanillaREST', { endpoint_url: '/recogito/api/img-annotations' });
+    </script>
+  </head>
+  	
+  <body>
+    <!-- div id="header">
+      <div id="title">
+        Image Annotation
+        <div id="home-button"><a href="@routes.ApplicationController.index(None)" class="icon">&#xf015;</a></div>
+      </div>
+    </div -->   
+    
+    <div id="content">
+      <img src="http://annotorious.github.io/demos/640px-Hallstatt_300.jpg" class="annotatable">
+    </div>
+  </body>
+</html>
